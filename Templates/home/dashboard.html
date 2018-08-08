@@ -5,9 +5,19 @@
     Dashboard
   </title>
 
-
-
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script>
+$.myjQuery = function(class_for_span, task_title,task_id) {
+      $("#Tasks").append("<li><input class = 'status_of_task' type = 'checkbox' value = '" + task_id +
+       "'>" + "<span class = "+class_for_span +">" + task_title+ "</span>");
+  };
+
+//calling myjQuery to add task to the page.
+  function adding_span(class_for_span, task_title,task_id) {
+    $.myjQuery(class_for_span, task_title,task_id);
+  };
+
+</script>
 </head>
 <body>
 <div id = "container">
@@ -19,29 +29,26 @@
       Scheduled Tasks
     </h2>
     {% if scheduled_tasks %}
+    <ul id = "Tasks">
       {% for task in scheduled_tasks %}
-        <ul id = "Tasks">
-          <li>
-            <input class = "status_of_task" type = "checkbox" value = "{{ task.id }}"/>
-            <script>
 
-            // We need to think about a way to make the text-decoration strike if task_done_flag = true
-
-
-            </script>
-          </li>
-        </ul>
+        <script>
+        var class_for_span = "task_";
+        class_for_span += {{ task.id }};
+        console.log(class_for_span);
+        adding_span(class_for_span, "{{ task.task_title }}", {{ task.id }})
+        </script>
       {% endfor %}
+    </ul>
     {% else %}
       There is no Scheduled Task.
     {% endif %}
   </div>
 </div>
 <script>
+
+//sending json object to update database
 $(document).ready(function() {
-
-
-
 $(".status_of_task").click(function () {
   console.log( $(this).is(":checked") );
   console.log( $(this).val());
@@ -57,17 +64,17 @@ $(".status_of_task").click(function () {
        success: function (data) {
          console.log(data.data_saved);
          if (data.data_saved) {
-
+           
          }
        }
      });
 
 });
-
-
 });
 </script>
+<script>
 
+</script>
 
 </body>
 </html>
