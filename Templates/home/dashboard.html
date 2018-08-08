@@ -1,0 +1,73 @@
+<html>
+<head>
+
+  <title>
+    Dashboard
+  </title>
+
+
+
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+</head>
+<body>
+<div id = "container">
+  <h1>
+    Yo! Lets plan something.
+  </h1>
+  <div id ="scheduled_tasks">
+    <h2>
+      Scheduled Tasks
+    </h2>
+    {% if scheduled_tasks %}
+      {% for task in scheduled_tasks %}
+        <ul id = "Tasks">
+          <li>
+            <input class = "status_of_task" type = "checkbox" value = "{{ task.id }}"/>
+            <script>
+
+            // We need to think about a way to make the text-decoration strike if task_done_flag = true
+
+
+            </script>
+          </li>
+        </ul>
+      {% endfor %}
+    {% else %}
+      There is no Scheduled Task.
+    {% endif %}
+  </div>
+</div>
+<script>
+$(document).ready(function() {
+
+
+
+$(".status_of_task").click(function () {
+  console.log( $(this).is(":checked") );
+  console.log( $(this).val());
+  var task_id = $(this).val();
+  var status = $(this).is(":checked");
+
+  var obj = {'id':task_id,'status':status };
+  console.log(obj);
+  $.ajax({
+       url: '/change_task_status/',
+       data: obj,
+       dataType: 'json',
+       success: function (data) {
+         console.log(data.data_saved);
+         if (data.data_saved) {
+
+         }
+       }
+     });
+
+});
+
+
+});
+</script>
+
+
+</body>
+</html>
