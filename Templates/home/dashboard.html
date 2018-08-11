@@ -5,19 +5,23 @@
     Dashboard
   </title>
 
-<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
-<script>
-$.myjQuery = function(class_for_span, task_title,task_id) {
-      $("#Tasks").append("<li><input class = 'status_of_task' type = 'checkbox' value = '" + task_id +
-       "'>" + "<span class = "+class_for_span +">" + task_title+ "</span>");
-  };
+<style>
 
-//calling myjQuery to add task to the page.
-  function adding_span(class_for_span, task_title,task_id) {
-    $.myjQuery(class_for_span, task_title,task_id);
+
+
+</style>
+
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+
+<script>
+$.myjQuery = function(id_for_checkbox, id_for_span, id_for_expand_tab, task_title, task_id) {
+      $("#Tasks").append("<li><input id = '"+ id_for_checkbox +"' class = 'status_of_task' type = 'checkbox' value = '"
+      + task_id + "'>" +
+      "<span id = '"+ id_for_span +"' class = 'task_title' onclick = 'expand_tab("+ id_for_expand_tab +")' >" + task_title + "</span>");
   };
 
 </script>
+
 </head>
 <body>
 <div id = "container">
@@ -33,11 +37,39 @@ $.myjQuery = function(class_for_span, task_title,task_id) {
       {% for task in scheduled_tasks %}
 
         <script>
-        var class_for_span = "task_";
-        class_for_span += {{ task.id }};
-        console.log(class_for_span);
-        adding_span(class_for_span, "{{ task.task_title }}", {{ task.id }})
+        var id_for_span = "span_task_";
+        var id_for_checkbox = "checkbox_task_";
+        var id_for_expand_tab = "tab_";
+        id_for_expand_tab += {{ task.id}};
+        id_for_span += {{ task.id }};
+        id_for_checkbox += {{ task.id }};
+        console.log(id_for_span);
+        console.log(id_for_expand_tab);
+        $.myjQuery(id_for_checkbox, id_for_span, id_for_expand_tab, "{{ task.task_title }}", {{ task.id }});
+
+        var div_write = "<div class = 'expand_tab' id = '"+ id_for_expand_tab +"' style = 'display:none;background:grey;'>";
+        document.write(div_write);
         </script>
+
+        <span onclick="this.parentElement.style.display='none'" class="closebtn">&times;</span>
+        <table>
+          <tr>
+            <th><b>Task Title</b></th><th>{{ task.task_title }}</th>
+          </tr>
+          <tr>
+            <th><b>Task Description</b></th><th>{{ task.task_description }}</th>
+          </tr>
+          <tr>
+            <th><b>Task Published On</b></th><th>{{ task.task_published }}</th>
+          </tr>
+          <tr>
+            <th><b>Task Scheduled For</b></th><th>{{ task.task_scheduled }}</th>
+          </tr>
+          <tr>
+            <th<b>>Task Status</b></th><th>{{ task.task_done_flag }}</th>
+          </tr>
+        </table>
+      </div>
       {% endfor %}
     </ul>
     {% else %}
@@ -46,16 +78,20 @@ $.myjQuery = function(class_for_span, task_title,task_id) {
   </div>
 </div>
 <script>
+function make_table(data) {
+  //Make table and print
+
+}
+
+
 
 //sending json object to update database
 $(document).ready(function() {
 $(".status_of_task").click(function () {
-  console.log( $(this).is(":checked") );
-  console.log( $(this).val());
   var task_id = $(this).val();
   var status = $(this).is(":checked");
 
-  var obj = {'id':task_id,'status':status };
+  var obj = {'id':task_id,'status':status};
   console.log(obj);
   $.ajax({
        url: '/change_task_status/',
@@ -64,7 +100,7 @@ $(".status_of_task").click(function () {
        success: function (data) {
          console.log(data.data_saved);
          if (data.data_saved) {
-           
+           make_strike(data.span_id);
          }
        }
      });
@@ -73,6 +109,58 @@ $(".status_of_task").click(function () {
 });
 </script>
 <script>
+function expand_task(data_obj) {
+
+//sending json to get back the data to show expanded version
+  $(document).ready(function() {
+  $(".status_of_task").click(function () {
+    var task_id = $(this).val();
+    var status = $(this).is(":checked");
+
+    var obj = {'id':task_id};
+    console.log(obj);
+    $.ajax({
+         url: '/get/details/',
+         data: obj,
+         dataType: 'json',
+         success: function (data) {
+           console.log(data.data_deliverd);
+           if (data.data_deliverd) {
+             make_table(data);
+           }
+         }
+       });
+
+  });
+  });
+
+
+}
+
+//to make the text have a line through it if the task is done.
+function make_strike(id_name){
+  var checkbox_id = "checkbox_task_";
+  checkbox_id += id_name.slice(10, );
+  console.log(checkbox_id);
+  var checkbox = document.getElementById(checkbox_id);
+  if(!checkbox.checked){
+  document.getElementById(id_name).style.textDecoration = null;
+  }
+  else{
+  document.getElementById(id_name).style.textDecoration = "line-through";
+  }
+}
+
+//to make expandable blocks
+function expand_tab(tab_name) {
+  var x,i;
+  x = document.getElementsByClassName('task_title');
+  for (i = 0; i < x.length; i++){
+    x[0].style.display = "none";
+  }
+console.log(document.getElementById(tab_name));
+document.getElementById(tab_name).style.display = "block"
+}
 
 </script>
 
