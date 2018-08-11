@@ -15,9 +15,23 @@
 
 <script>
 $.myjQuery = function(id_for_checkbox, id_for_span, id_for_expand_tab, task_title, task_id) {
-      $("#Tasks").append("<li><input id = '"+ id_for_checkbox +"' class = 'status_of_task' type = 'checkbox' value = '"
-      + task_id + "'>" +
-      "<span id = '"+ id_for_span +"' class = 'task_title' onclick = 'expand_tab("+ id_for_expand_tab +")' >" + task_title + "</span>");
+      li = document.createElement("li");
+      li.id = id_for_expand_tab;
+      input = document.createElement("input");
+      input.id = id_for_checkbox;
+      input.className = "status_of_task";
+      input.type = "checkbox";
+      input.value = task_id;
+      span = document.createElement("span");
+      span.id = id_for_span;
+      span.className = "task_title";
+      console.log("tab to expand" + id_for_expand_tab);
+      span.onclick = function(){expand_tab();};
+      span.textContent = task_title;
+      li.appendChild(input);
+      li.appendChild(span);
+      ul = document.getElementById("Tasks");
+      ul.appendChild(li);
   };
 
 </script>
@@ -47,29 +61,9 @@ $.myjQuery = function(id_for_checkbox, id_for_span, id_for_expand_tab, task_titl
         console.log(id_for_expand_tab);
         $.myjQuery(id_for_checkbox, id_for_span, id_for_expand_tab, "{{ task.task_title }}", {{ task.id }});
 
-        var div_write = "<div class = 'expand_tab' id = '"+ id_for_expand_tab +"' style = 'display:none;background:grey;'>";
-        document.write(div_write);
         </script>
 
-        <span onclick="this.parentElement.style.display='none'" class="closebtn">&times;</span>
-        <table>
-          <tr>
-            <th><b>Task Title</b></th><th>{{ task.task_title }}</th>
-          </tr>
-          <tr>
-            <th><b>Task Description</b></th><th>{{ task.task_description }}</th>
-          </tr>
-          <tr>
-            <th><b>Task Published On</b></th><th>{{ task.task_published }}</th>
-          </tr>
-          <tr>
-            <th><b>Task Scheduled For</b></th><th>{{ task.task_scheduled }}</th>
-          </tr>
-          <tr>
-            <th<b>>Task Status</b></th><th>{{ task.task_done_flag }}</th>
-          </tr>
-        </table>
-      </div>
+
       {% endfor %}
     </ul>
     {% else %}
@@ -156,8 +150,9 @@ function expand_tab(tab_name) {
   var x,i;
   x = document.getElementsByClassName('task_title');
   for (i = 0; i < x.length; i++){
-    x[0].style.display = "none";
+    x[i].style.display = "none";
   }
+
 console.log(document.getElementById(tab_name));
 document.getElementById(tab_name).style.display = "block"
 }
