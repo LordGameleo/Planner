@@ -11,3 +11,7 @@ class Task(models.Model):
     def __str__(self):
         display_tag = "'" + str(self.task_title) + "' - " + " to be completed by - " +str(self.publish_time_stamp.date())
         return display_tag
+    def published_on(self):
+        return str(self.publish_time_stamp)
+    def scheduled_on(self):
+        return str(self.scheduled_end_time)

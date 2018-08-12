@@ -14,66 +14,114 @@
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 
 <script>
-$.myjQuery = function(id_for_checkbox, id_for_span, id_for_expand_tab, task_title, task_id) {
+//to make the text have a line through it if the task is done.
+function make_strike(id_name){
+  var checkbox_id = "checkbox_task_";
+  checkbox_id += id_name.slice(10, );
+  console.log("CHECKBOX------");
+  console.log(checkbox_id);
+  var checkbox = document.getElementById(checkbox_id);
+
+  // if(!checkbox.checked){
+  // document.getElementById(id_name).style.textDecoration = null;
+  // }
+  // else{
+  // document.getElementById(id_name).style.textDecoration = "line-through";
+  // }
+}
+
+$.task_list_jQuery = function(table_id, id_for_checkbox, id_for_span, id_for_expand_tab, task_title, task_id,task_status) {
       li = document.createElement("li");
       li.id = id_for_expand_tab;
+      console.log("CHECKBOX++++++" + id_for_checkbox);
       input = document.createElement("input");
       input.id = id_for_checkbox;
       input.className = "status_of_task";
       input.type = "checkbox";
       input.value = task_id;
+      console.log("status " + task_status.toLowerCase());
+      if(task_status == "False"){
+        input.checked = false;
+        console.log("status ____________" + false);
+      }
+      else{
+        input.checked = true;
+        make_strike(id_for_span);
+        console.log("status ____________" + task_status);
+      }
       span = document.createElement("span");
       span.id = id_for_span;
       span.className = "task_title";
       console.log("tab to expand" + id_for_expand_tab);
-      span.onclick = function(){expand_tab();};
+      span.onclick = function(){expand_tab(table_id);};
       span.textContent = task_title;
       li.appendChild(input);
       li.appendChild(span);
       ul = document.getElementById("Tasks");
       ul.appendChild(li);
   };
+$.task_description_jQuery = function(table_id,task_title,task_description,task_published,task_scheduled,task_done_flag,li_name){
+    table = document.createElement("table");
+    table.className = "task_description";
+    table.id = table_id
+    table.hidden ="true";
 
-</script>
+    tr_title = document.createElement("tr");
+    th_title = document.createElement("th");
+    th_title.textContent = "Title";
+    td_title = document.createElement("td");
+    td_title.textContent = task_title;
+    tr_title.appendChild(th_title);
+    tr_title.appendChild(td_title);
+    table.appendChild(tr_title);
 
-</head>
-<body>
-<div id = "container">
-  <h1>
-    Yo! Lets plan something.
-  </h1>
-  <div id ="scheduled_tasks">
-    <h2>
-      Scheduled Tasks
-    </h2>
-    {% if scheduled_tasks %}
-    <ul id = "Tasks">
-      {% for task in scheduled_tasks %}
-
-        <script>
-        var id_for_span = "span_task_";
-        var id_for_checkbox = "checkbox_task_";
-        var id_for_expand_tab = "tab_";
-        id_for_expand_tab += {{ task.id}};
-        id_for_span += {{ task.id }};
-        id_for_checkbox += {{ task.id }};
-        console.log(id_for_span);
-        console.log(id_for_expand_tab);
-        $.myjQuery(id_for_checkbox, id_for_span, id_for_expand_tab, "{{ task.task_title }}", {{ task.id }});
-
-        </script>
+    tr_description = document.createElement("tr");
+    th_description = document.createElement("th");
+    th_description.textContent = "Description";
+    td_description = document.createElement("td");
+    td_description.textContent = task_description;
+    tr_description.appendChild(th_description);
+    tr_description.appendChild(td_description);
+    table.appendChild(tr_description);
 
 
-      {% endfor %}
-    </ul>
-    {% else %}
-      There is no Scheduled Task.
-    {% endif %}
-  </div>
-</div>
-<script>
-function make_table(data) {
-  //Make table and print
+    tr_published = document.createElement("tr");
+    th_published = document.createElement("th");
+    th_published.textContent = "Published on";
+    td_published = document.createElement("td");
+    td_published.textContent = task_published;
+    tr_published.appendChild(th_published);
+    tr_published.appendChild(td_published);
+    table.appendChild(tr_published);
+
+
+    tr_scheduled =  document.createElement("tr");
+    th_scheduled = document.createElement("th");
+    th_scheduled.textContent = "Schecduled for";
+    td_scheduled = document.createElement("td");
+    td_scheduled.textContent = task_scheduled;
+    tr_scheduled.appendChild(th_scheduled);
+    tr_scheduled.appendChild(td_scheduled);
+    table.appendChild(tr_scheduled);
+
+
+    tr_status = document.createElement("tr");
+    th_status = document.createElement("th");
+    th_status.textContent = "Status";
+    td_status = document.createElement("td");
+    td_status.textContent = task_done_flag;
+    tr_status.appendChild(th_status);
+    tr_status.appendChild(td_status);
+    table.appendChild(tr_status);
+    console.log(table)
+    table.border = "solid";
+    table.width = "500px";
+
+    document.getElementById(li_name).appendChild(table);
+    // <table>
+    //   <tr><th>Thead</th><th>Th</th></tr>
+    //   <tr><th>Thead</th><th>Th</th></tr>
+    // </table>
 
 }
 
@@ -101,8 +149,7 @@ $(".status_of_task").click(function () {
 
 });
 });
-</script>
-<script>
+
 function expand_task(data_obj) {
 
 //sending json to get back the data to show expanded version
@@ -131,32 +178,67 @@ function expand_task(data_obj) {
 
 }
 
-//to make the text have a line through it if the task is done.
-function make_strike(id_name){
-  var checkbox_id = "checkbox_task_";
-  checkbox_id += id_name.slice(10, );
-  console.log(checkbox_id);
-  var checkbox = document.getElementById(checkbox_id);
-  if(!checkbox.checked){
-  document.getElementById(id_name).style.textDecoration = null;
-  }
-  else{
-  document.getElementById(id_name).style.textDecoration = "line-through";
-  }
-}
+
 
 //to make expandable blocks
-function expand_tab(tab_name) {
+function expand_tab(table_id) {
   var x,i;
-  x = document.getElementsByClassName('task_title');
+  x = document.getElementsByClassName('task_description');
   for (i = 0; i < x.length; i++){
-    x[i].style.display = "none";
+    x[i].hidden = "true";
   }
-
-console.log(document.getElementById(tab_name));
-document.getElementById(tab_name).style.display = "block"
+console.log("table id " + table_id);
+document.getElementById(table_id).hidden = false;
+console.log(document.getElementById(table_id).hidden);
 }
 
+
+</script>
+
+</head>
+<body>
+<div id = "container">
+  <h1>
+    Yo! Lets plan something.
+  </h1>
+  <div id ="scheduled_tasks">
+    <h2>
+      Scheduled Tasks
+    </h2>
+    {% if scheduled_tasks %}
+    <ul id = "Tasks">
+      {% for task in scheduled_tasks %}
+
+        <script>
+        var id_for_span = "span_task_";
+        var id_for_checkbox = "checkbox_task_";
+        var id_for_expand_tab = "tab_";
+        var table_id = "table_";
+        var task_title = "{{ task.task_title }}";
+        var task_description = "{{ task.task_description }}";
+        var task_published = "{{ task.published_on }}";
+        var task_scheduled = "{{ task.scheduled_on }}";
+        var task_done_flag = "{{ task.task_done_flag }}";
+        console.log(task_title + "The");
+        table_id += {{ task.id}};
+        id_for_expand_tab += {{ task.id}};
+        id_for_span += {{ task.id }};
+        id_for_checkbox += {{ task.id }};
+        console.log(id_for_span);
+        $.task_list_jQuery(table_id,id_for_checkbox, id_for_span, id_for_expand_tab, "{{ task.task_title }}", "{{ task.id }}", task_done_flag);
+        $.task_description_jQuery(table_id,task_title,task_description,task_published,task_scheduled,task_done_flag,id_for_expand_tab);
+        </script>
+
+
+      {% endfor %}
+    </ul>
+
+    {% else %}
+      There is no Scheduled Task.
+    {% endif %}
+  </div>
+</div>
+<script>
 </script>
 
 </body>
