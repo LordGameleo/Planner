@@ -212,6 +212,7 @@ document.getElementById(table_id).hidden = false;
     <ul id = "Tasks">
       <h3>Tasks</h3>
       {% for task in scheduled_tasks %}
+      {% if task.task_done_flag == 0%}
         <script>
         var id_for_span = "span_task_";
         var id_for_checkbox = "checkbox_task_";
@@ -231,8 +232,32 @@ document.getElementById(table_id).hidden = false;
         $.task_list_jQuery(table_id,id_for_checkbox, id_for_span, id_for_expand_tab, "{{ task.task_title }}", "{{ task.id }}", task_done_flag);
         $.task_description_jQuery(table_id,task_title,task_description,task_published,task_scheduled,task_done_flag,id_for_expand_tab);
         </script>
+      {% endif %}
       {% endfor %}
 
+      {% for task in scheduled_tasks %}
+      {% if task.task_done_flag != 0 %}
+        <script>
+        var id_for_span = "span_task_";
+        var id_for_checkbox = "checkbox_task_";
+        var id_for_expand_tab = "tab_";
+        var table_id = "table_";
+        var task_title = "{{ task.task_title }}";
+        var task_description = "{{ task.task_description }}";
+        var task_published = "{{ task.published_on }}";
+        var task_scheduled = "{{ task.scheduled_on }}";
+        var task_done_flag = "{{ task.task_done_flag }}";
+        //console.log(task_title + "The");
+        table_id += {{ task.id}};
+        id_for_expand_tab += {{ task.id}};
+        id_for_span += {{ task.id }};
+        id_for_checkbox += {{ task.id }};
+        //console.log(id_for_span);
+        $.task_list_jQuery(table_id,id_for_checkbox, id_for_span, id_for_expand_tab, "{{ task.task_title }}", "{{ task.id }}", task_done_flag);
+        $.task_description_jQuery(table_id,task_title,task_description,task_published,task_scheduled,task_done_flag,id_for_expand_tab);
+        </script>
+      {% endif %}
+      {% endfor %}
     </ul>
     {% else %}
     No Schedulded Task.
