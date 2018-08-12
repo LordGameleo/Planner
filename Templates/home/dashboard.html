@@ -19,40 +19,41 @@ function make_strike(id_name){
   var checkbox_id = "checkbox_task_";
   checkbox_id += id_name.slice(10, );
   console.log("CHECKBOX------");
-  console.log(checkbox_id);
   var checkbox = document.getElementById(checkbox_id);
+  console.log(checkbox);
 
-  // if(!checkbox.checked){
-  // document.getElementById(id_name).style.textDecoration = null;
-  // }
-  // else{
-  // document.getElementById(id_name).style.textDecoration = "line-through";
-  // }
+
+    if(!checkbox.checked){
+      document.getElementById(id_name).style.textDecoration = null;
+
+    }
+    else{
+      document.getElementById(id_name).style.textDecoration = "line-through";
+    }
 }
 
 $.task_list_jQuery = function(table_id, id_for_checkbox, id_for_span, id_for_expand_tab, task_title, task_id,task_status) {
       li = document.createElement("li");
       li.id = id_for_expand_tab;
-      console.log("CHECKBOX++++++" + id_for_checkbox);
       input = document.createElement("input");
       input.id = id_for_checkbox;
       input.className = "status_of_task";
       input.type = "checkbox";
       input.value = task_id;
-      console.log("status " + task_status.toLowerCase());
-      if(task_status == "False"){
-        input.checked = false;
-        console.log("status ____________" + false);
+      console.log("CHECKBOX++++++  " + task_status);
+      if (task_status == "True"){
+        input.checked = true;
       }
       else{
-        input.checked = true;
-        make_strike(id_for_span);
-        console.log("status ____________" + task_status);
+        input.checked = false;
       }
       span = document.createElement("span");
       span.id = id_for_span;
+      if (task_status == "True"){
+      span.style.textDecoration = "line-through";
+      }
       span.className = "task_title";
-      console.log("tab to expand" + id_for_expand_tab);
+      //console.log("tab to expand" + id_for_expand_tab);
       span.onclick = function(){expand_tab(table_id);};
       span.textContent = task_title;
       li.appendChild(input);
@@ -61,6 +62,8 @@ $.task_list_jQuery = function(table_id, id_for_checkbox, id_for_span, id_for_exp
       ul.appendChild(li);
   };
 $.task_description_jQuery = function(table_id,task_title,task_description,task_published,task_scheduled,task_done_flag,li_name){
+    div = document.createElement("div");
+
     table = document.createElement("table");
     table.className = "task_description";
     table.id = table_id
@@ -113,11 +116,11 @@ $.task_description_jQuery = function(table_id,task_title,task_description,task_p
     tr_status.appendChild(th_status);
     tr_status.appendChild(td_status);
     table.appendChild(tr_status);
-    console.log(table)
+    //console.log(table)
     table.border = "solid";
     table.width = "500px";
-
-    document.getElementById(li_name).appendChild(table);
+    div.appendChild(table)
+    document.getElementById(li_name).appendChild(div);
     // <table>
     //   <tr><th>Thead</th><th>Th</th></tr>
     //   <tr><th>Thead</th><th>Th</th></tr>
@@ -134,13 +137,13 @@ $(".status_of_task").click(function () {
   var status = $(this).is(":checked");
 
   var obj = {'id':task_id,'status':status};
-  console.log(obj);
+  //console.log(obj);
   $.ajax({
        url: '/change_task_status/',
        data: obj,
        dataType: 'json',
        success: function (data) {
-         console.log(data.data_saved);
+         //console.log(data.data_saved);
          if (data.data_saved) {
            make_strike(data.span_id);
          }
@@ -159,13 +162,13 @@ function expand_task(data_obj) {
     var status = $(this).is(":checked");
 
     var obj = {'id':task_id};
-    console.log(obj);
+    //console.log(obj);
     $.ajax({
          url: '/get/details/',
          data: obj,
          dataType: 'json',
          success: function (data) {
-           console.log(data.data_deliverd);
+           //console.log(data.data_deliverd);
            if (data.data_deliverd) {
              make_table(data);
            }
@@ -187,9 +190,9 @@ function expand_tab(table_id) {
   for (i = 0; i < x.length; i++){
     x[i].hidden = "true";
   }
-console.log("table id " + table_id);
+//console.log("table id " + table_id);
 document.getElementById(table_id).hidden = false;
-console.log(document.getElementById(table_id).hidden);
+//console.log(document.getElementById(table_id).hidden);
 }
 
 
@@ -207,8 +210,8 @@ console.log(document.getElementById(table_id).hidden);
     </h2>
     {% if scheduled_tasks %}
     <ul id = "Tasks">
+      <h3>Tasks</h3>
       {% for task in scheduled_tasks %}
-
         <script>
         var id_for_span = "span_task_";
         var id_for_checkbox = "checkbox_task_";
@@ -219,23 +222,23 @@ console.log(document.getElementById(table_id).hidden);
         var task_published = "{{ task.published_on }}";
         var task_scheduled = "{{ task.scheduled_on }}";
         var task_done_flag = "{{ task.task_done_flag }}";
-        console.log(task_title + "The");
+        //console.log(task_title + "The");
         table_id += {{ task.id}};
         id_for_expand_tab += {{ task.id}};
         id_for_span += {{ task.id }};
         id_for_checkbox += {{ task.id }};
-        console.log(id_for_span);
+        //console.log(id_for_span);
         $.task_list_jQuery(table_id,id_for_checkbox, id_for_span, id_for_expand_tab, "{{ task.task_title }}", "{{ task.id }}", task_done_flag);
         $.task_description_jQuery(table_id,task_title,task_description,task_published,task_scheduled,task_done_flag,id_for_expand_tab);
         </script>
-
-
       {% endfor %}
-    </ul>
 
+    </ul>
     {% else %}
-      There is no Scheduled Task.
-    {% endif %}
+    No Schedulded Task.
+  {% endif %}
+
+
   </div>
 </div>
 <script>
