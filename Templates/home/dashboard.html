@@ -18,9 +18,9 @@
 function make_strike(id_name){
   var checkbox_id = "checkbox_task_";
   checkbox_id += id_name.slice(10, );
-  console.log("CHECKBOX------");
+  // console.log("CHECKBOX------");
   var checkbox = document.getElementById(checkbox_id);
-  console.log(checkbox);
+  // console.log(checkbox);
 
 
     if(!checkbox.checked){
@@ -35,12 +35,13 @@ function make_strike(id_name){
 $.task_list_jQuery = function(table_id, id_for_checkbox, id_for_span, id_for_expand_tab, task_title, task_id,task_status) {
       li = document.createElement("li");
       li.id = id_for_expand_tab;
+      li.class = "task_li"
       input = document.createElement("input");
       input.id = id_for_checkbox;
       input.className = "status_of_task";
       input.type = "checkbox";
       input.value = task_id;
-      console.log("CHECKBOX++++++  " + task_status);
+      // console.log("CHECKBOX++++++  " + task_status);
       if (task_status == "True"){
         input.checked = true;
       }
@@ -61,7 +62,8 @@ $.task_list_jQuery = function(table_id, id_for_checkbox, id_for_span, id_for_exp
       ul = document.getElementById("Tasks");
       ul.appendChild(li);
   };
-$.task_description_jQuery = function(table_id,task_title,task_description,task_published,task_scheduled,task_done_flag,li_name){
+$.task_description_jQuery = function(table_id,task_title,task_description,
+  task_published_date,task_scheduled,task_done_flag,li_name){
     div = document.createElement("div");
 
     table = document.createElement("table");
@@ -92,7 +94,7 @@ $.task_description_jQuery = function(table_id,task_title,task_description,task_p
     th_published = document.createElement("th");
     th_published.textContent = "Published on";
     td_published = document.createElement("td");
-    td_published.textContent = task_published;
+    td_published.textContent = task_published_date;
     tr_published.appendChild(th_published);
     tr_published.appendChild(td_published);
     table.appendChild(tr_published);
@@ -143,9 +145,11 @@ $(".status_of_task").click(function () {
        data: obj,
        dataType: 'json',
        success: function (data) {
-         //console.log(data.data_saved);
+         // console.log(data.data_saved);
+         // console.log("yo");
          if (data.data_saved) {
            make_strike(data.span_id);
+           // console.log("ypo");
          }
        }
      });
@@ -153,33 +157,7 @@ $(".status_of_task").click(function () {
 });
 });
 
-function expand_task(data_obj) {
 
-//sending json to get back the data to show expanded version
-  $(document).ready(function() {
-  $(".status_of_task").click(function () {
-    var task_id = $(this).val();
-    var status = $(this).is(":checked");
-
-    var obj = {'id':task_id};
-    //console.log(obj);
-    $.ajax({
-         url: '/get/details/',
-         data: obj,
-         dataType: 'json',
-         success: function (data) {
-           //console.log(data.data_deliverd);
-           if (data.data_deliverd) {
-             make_table(data);
-           }
-         }
-       });
-
-  });
-  });
-
-
-}
 
 
 
@@ -195,7 +173,68 @@ document.getElementById(table_id).hidden = false;
 //console.log(document.getElementById(table_id).hidden);
 }
 
+function show_form() {
+    var element = document.getElementById("form");
+    element.hidden = ! element.hidden;
+}
 
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+var csrftoken = getCookie('csrftoken');
+
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+    }
+});
+
+var title,description,date,time,obj;
+function add_new_task() {
+  title = document.getElementById("form_title").value;
+  description = document.getElementById("form_description").value;
+  date = document.getElementById("form_date").value;
+  time = document.getElementById("form_time").value;
+  obj = {'task_title' : title, 'task_description' : description,
+  'scheduled_on_date' : date, 'scheduled_on_time' : time};
+  //sending json to save data in database
+    $(document).ready(function() {
+      // console.log(obj);
+      $.ajax({
+           url: '/save_task/',
+           data: obj,
+           method: "POST",
+           dataType: 'json',
+
+           success: function (data) {
+             // console.log(data.message);
+             if (data.message=='Task Saved') {
+               alert("Saved");
+               location.href = location.href;
+             }
+           }
+         });
+
+    });
+}
 </script>
 
 </head>
@@ -204,7 +243,18 @@ document.getElementById(table_id).hidden = false;
   <h1>
     Yo! Lets plan something.
   </h1>
-  <div id ="scheduled_tasks">
+  <div class = "form-container" style="float:right; margin-top:0px;margin-right:400px;">
+  <form method = "post" id = "form" hidden="true">
+    <h1>Task Form</h1>
+    <label>Task Title</label><br><input type = "text" id="form_title"><br>
+    <label>Task Description</label><br><input type = "text" id="form_description"><br>
+    <label>Scheduled Date</label><br><input type = "date" id="form_date"><br>
+    <label>Scheduled Time</label><br><input type = "time" id="form_time"><br>
+    <input type="button" onclick="add_new_task()" value="Add this task"/>
+  </form>
+  </div>
+
+  <div id ="scheduled_tasks" style="float:left;width:750px;">
     <h2>
       Scheduled Tasks
     </h2>
@@ -248,7 +298,7 @@ document.getElementById(table_id).hidden = false;
         var task_scheduled = "{{ task.scheduled_on }}";
         var task_done_flag = "{{ task.task_done_flag }}";
         //console.log(task_title + "The");
-        table_id += {{ task.id}};
+        table_id += {{ task.id }};
         id_for_expand_tab += {{ task.id}};
         id_for_span += {{ task.id }};
         id_for_checkbox += {{ task.id }};
@@ -262,9 +312,10 @@ document.getElementById(table_id).hidden = false;
     {% else %}
     No Schedulded Task.
   {% endif %}
+  <button onclick="show_form()">Add Task</button>
 
+</div>
 
-  </div>
 </div>
 <script>
 </script>

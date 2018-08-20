@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from todo.models import *
 from django.http import JsonResponse
+import datetime
 def dashboard(request):
     scheduled_tasks = Task.objects.all()
     return render(request, 'home/dashboard.html', {'scheduled_tasks' : scheduled_tasks})
@@ -51,3 +52,18 @@ def django_to_html_json(request):
     response_data['message'] = 'Some error message'
     data_json = json.dumps(response_data)
     return JsonResponse(response_data)
+def save_task(request):
+    if request.method == "POST":
+        task_title = request.POST['task_title']
+        task_description = request.POST['task_description']
+        scheduled_on_date = request.POST['scheduled_on_date']
+        scheduled_on_time = request.POST['scheduled_on_time']
+        year,month,day = list(map(int,scheduled_on_date.split('-')))
+        hour,minute = list(map(int,scheduled_on_time.split(':')))
+        scheduled_end_time = datetime.datetime(year,month,day,hour,minute)
+        Task(task_title = task_title,task_description = task_description,
+        scheduled_end_time = scheduled_end_time).save()
+        rebound_json = {
+        'message' : 'Task Saved'
+        }
+        return JsonResponse(rebound_json)
